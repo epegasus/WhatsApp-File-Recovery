@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">WhatsApp File Recovery</string>
+
+    <string name="images">Images</string>
+    <string name="videos">Videos</string>
+    <string name="audio">Audio</string>
+    <string name="document">Document</string>
+
+
+    <string name="dialog_permission_storage_title">Storage Permission</string>
+    <string name="dialog_permission_storage_message">Allow `WhatsApp File Recovery` app to access photos and medias on your device.</string>
+
+    <string name="dialog_permission_setting_title">Permission Required</string>
+    <string name="dialog_permission_setting_message">Allow permission from \'Settings\' to proceed.</string>
+
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
+
+</resources>
