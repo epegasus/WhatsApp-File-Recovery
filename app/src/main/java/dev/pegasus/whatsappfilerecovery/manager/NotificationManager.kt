@@ -80,6 +80,7 @@ class NotificationManager(private val context: Context) {
             .setContentText("Deleted media has been recovered successfully.")
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setAutoCancel(true)
             .setOngoing(true)
             .build()

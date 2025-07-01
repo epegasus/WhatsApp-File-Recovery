@@ -6,6 +6,7 @@ import android.os.Environment
 import android.os.FileObserver
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleCoroutineScope
 import dev.pegasus.whatsappfilerecovery.utils.ConstantUtils.TAG
 import dev.pegasus.whatsappfilerecovery.utils.copySafely
@@ -22,6 +23,9 @@ import java.io.File
  */
 
 class MediaObserverManager(private val context: Context, private val notificationManager: NotificationManager, private val applicationScope: LifecycleCoroutineScope) {
+
+    private val treeUri by lazy { (context.getSharedPreferences("permission_preferences", Context.MODE_PRIVATE)).getString("document_tree_uri", "")?.toUri() }
+
 
     private val observers = mutableListOf<FileObserver>()
 
@@ -134,14 +138,14 @@ class MediaObserverManager(private val context: Context, private val notificatio
 
             when (event) {
                 CREATE, MODIFY, MOVED_TO -> {
-                    applicationScope.launch { eventFile.copySafely(context, backupDir) }
+                    applicationScope.launch { eventFile.copySafely(context, backupDir, treeUri!!) }
                 }
 
                 DELETE -> {
                     applicationScope.launch {
                         val cached = File(backupDir, eventFile.name)
                         if (cached.exists()) {
-                            cached.copySafely(context, recoveryDir)
+                            cached.copySafely(context, recoveryDir, treeUri!!)
                             notificationManager.postNotificationRecovery(cached)
                         }
                     }
@@ -159,15 +163,17 @@ class MediaObserverManager(private val context: Context, private val notificatio
 
             when (event) {
                 CREATE, MODIFY -> {
-                    applicationScope.launch { eventFile.copySafely(context, backupDir) }
+                    applicationScope.launch { eventFile.copySafely(context, backupDir, treeUri!!) }
                 }
 
                 DELETE -> {
                     applicationScope.launch {
                         val cached = File(backupDir, eventFile.name)
                         if (cached.exists()) {
-                            cached.copySafely(context, recoveryDir)
+                            cached.copySafely(context, recoveryDir, treeUri!!)
                             notificationManager.postNotificationRecovery(cached)
+                        } else {
+                            Log.e(TAG, "MediaObserverHigher: onEvent: file: $cached not exist.")
                         }
                     }
                 }

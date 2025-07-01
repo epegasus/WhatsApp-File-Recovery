@@ -11,6 +11,9 @@ constraintlayout = "2.2.1"
 # LifeCycle
 lifecycleProcess = "2.9.1"
 
+# Glide
+glide = "5.0.0-rc01"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -24,3 +27,6 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 # LifeCycle
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
+
+# Glide
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }

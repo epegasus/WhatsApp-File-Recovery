@@ -42,4 +42,7 @@ dependencies {
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.process)
+
+    // Glide
+    implementation(libs.glide)
 }
