@@ -17,7 +17,7 @@ import dev.pegasus.whatsappfilerecovery.databinding.ItemMediaBinding
  * - GitHub: <a href="https://github.com/epegasus">Github</a>
  */
 
-class AdapterMedia : ListAdapter<String, AdapterMedia.CustomViewHolder>(DiffCallback) {
+class AdapterImages : ListAdapter<String, AdapterImages.CustomViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)

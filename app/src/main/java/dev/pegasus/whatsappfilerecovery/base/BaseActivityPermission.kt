@@ -38,9 +38,7 @@ open class BaseActivityPermission : AppCompatActivity() {
     private var callback: ((Boolean) -> Unit)? = null
 
     private val storagePermission by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
@@ -48,10 +46,8 @@ open class BaseActivityPermission : AppCompatActivity() {
     }
 
     private val storagePermissionArray by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO)
         } else {
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
@@ -176,7 +172,11 @@ open class BaseActivityPermission : AppCompatActivity() {
 
     fun askFullStoragePermission(callback: (Boolean) -> Unit) {
         this.callback = callback
-        askStoragePermission()
+        if (checkFullStoragePermission() == true) {
+            callback.invoke(true)
+        } else {
+            askStoragePermission()
+        }
     }
 
     /* --------------------------- Permission smaller than api R (android: 30 {11}) & Higher (for saving only) --------------------------- */

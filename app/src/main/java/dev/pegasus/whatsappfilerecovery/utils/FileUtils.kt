@@ -1,16 +1,19 @@
 package dev.pegasus.whatsappfilerecovery.utils
 
-import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.provider.MediaStore
+import android.os.FileUtils
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import dev.pegasus.whatsappfilerecovery.utils.ConstantUtils.TAG
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 
 /**
@@ -32,11 +35,14 @@ suspend fun File.copySafely(context: Context, dstDir: File, treeUri: Uri) = with
         }
 
         val newFile = File(dstDir, src.name)
-        when {
-            src.canReadDirectly() -> src.copyTo(newFile, overwrite = true)
+        copyViaDocumentFile(context, src, dstDir, treeUri)
+        /*when {
+            src.canReadDirectly() -> {
+                src.copyTo(newFile, overwrite = true)
+                Log.d(TAG, "FileUtils: copySafely: Copied ${src.name} → $newFile")
+            }
             else -> copyViaDocumentFile(context, src, dstDir, treeUri)
-        }
-        Log.d(TAG, "FileUtils: copySafely: Copied ${src.name} → $newFile")
+        }*/
     }.onFailure { Log.e(TAG, "FileUtils: copySafely: Copy failed: ${src.path}", it) }
 }
 
@@ -46,7 +52,8 @@ fun File.canReadDirectly(): Boolean {
     // Define the known "can't read directly" folders
     val voiceNoteDirs = listOf(
         "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-        "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes"
+        "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes",
+        "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Images",
     )
 
     val isVoiceNoteDir = voiceNoteDirs.any { path.startsWith(it) }
@@ -54,84 +61,32 @@ fun File.canReadDirectly(): Boolean {
     return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || (!path.startsWith(mediaRoot) || !isVoiceNoteDir)
 }
 
-private fun copyViaDocumentFile(
-    context: Context,
-    src: File,
-    dst: File, // Only used for its file name
-    treeUri: Uri
-) {
-    val contentResolver = context.contentResolver
-
-    // Convert file path to URI (content URI) using the contentResolver
-    val contentUri = getContentUriFromFile(context, src)
-
-    contentUri?.let { uri ->
-        val inputStream = contentResolver.openInputStream(uri)
-
-        inputStream?.let { input ->
-            // Define destination file in your app's cache directory
-            val destinationFile = File(dst, src.name)
-            val outputStream = FileOutputStream(destinationFile)
-
-            try {
-                input.copyTo(outputStream)
-                // Successfully copied to cache dir
-                Log.d(TAG, "File copied to cache: ${destinationFile.absolutePath}")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error copying file", e)
-            } finally {
-                input.close()
-                outputStream.close()
+private fun copyViaDocumentFile(context: Context, src: File, dstDir: File, treeUri: Uri) {
+    CoroutineScope(Dispatchers.Default).launch {
+        Log.d(TAG, "copyViaDocumentFile: called")
+        DocumentFile.fromTreeUri(context, treeUri)
+            ?.findFile("com.whatsapp")
+            ?.findFile("WhatsApp")
+            ?.findFile("Media")
+            ?.findFile("WhatsApp Voice Notes")
+            ?.let { voiceNotesDir ->
+                voiceNotesDir
+                    .listFiles()
+                    .firstOrNull { it.name.equals(src.parentFile?.name) }
+                    ?.listFiles()
+                    ?.firstOrNull { it.name == src.name }
+                    ?.let { srcIt ->
+                        val dstFile = srcIt.name?.let { it1 -> File(dstDir, it1) }
+                        val parcelFileDescriptor = context.contentResolver.openFileDescriptor(srcIt.uri, "r", null)
+                        val inputStream = FileInputStream(parcelFileDescriptor?.fileDescriptor)
+                        val outputStream = FileOutputStream(dstFile)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            FileUtils.copy(inputStream, outputStream)
+                            Log.d(TAG, "copyViaDocumentFile: copied")
+                            return@launch
+                        }
+                    }
             }
-        }
-    } ?: run {
-        Log.e(TAG, "Invalid content URI or permission issues")
+        Log.e(TAG, "copyViaDocumentFile: failed to copy")
     }
 }
-
-// Function to get content URI from file path (SAF)
-private fun getContentUriFromFile(context: Context, file: File): Uri? {
-    val uri = Uri.fromFile(file)
-    val contentUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        // Use MediaStore to get a content URI for Android 10 and above
-        val projection = arrayOf(MediaStore.Images.Media._ID)
-        val selection = "${MediaStore.Images.Media.DATA} = ?"
-        val selectionArgs = arrayOf(file.absolutePath)
-        val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-
-        context.contentResolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-                return ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-            }
-        }
-        null
-    } else {
-        // For older Android versions, simply use the File URI
-        uri
-    }
-    return contentUri
-}
-
-
-/*
-private fun copyViaDocumentFile(context: Context, src: File, dstDir: File) {
-    findPersistedTree(context, src) ?: return
-    val doc = DocumentFile.fromFile(src)
-    val input = context.contentResolver.openInputStream(doc.uri) ?: return
-    val outFile = File(dstDir, src.name)
-    input.use { inp -> FileOutputStream(outFile).use { inp.copyTo(it) } }
-}
-
-private fun findPersistedTree(context: Context, src: File): DocumentFile? {
-    return context
-        .contentResolver
-        .persistedUriPermissions
-        .firstOrNull {
-            src
-                .path
-                .startsWith(it.uri.path.orEmpty())
-        }?.let {
-            DocumentFile.fromTreeUri(context, it.uri)
-        }
-}*/

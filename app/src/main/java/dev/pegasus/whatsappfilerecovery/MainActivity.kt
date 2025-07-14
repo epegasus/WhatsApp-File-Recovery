@@ -7,10 +7,12 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import dev.pegasus.whatsappfilerecovery.activities.ActivityMedia
+import dev.pegasus.whatsappfilerecovery.activities.ActivityImages
 import dev.pegasus.whatsappfilerecovery.base.BaseActivity
 import dev.pegasus.whatsappfilerecovery.databinding.ActivityMainBinding
 import dev.pegasus.whatsappfilerecovery.services.MediaService
+import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils
+import java.io.File
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
@@ -23,13 +25,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     override fun onCreated() {
+        setPath()
         setUI()
 
-        binding.mbImage.setOnClickListener { navigateScreen(0) }
-        binding.mbVideo.setOnClickListener { navigateScreen(1) }
-        binding.mbAudio.setOnClickListener { navigateScreen(2) }
-        binding.mbDocument.setOnClickListener { navigateScreen(3) }
+        binding.mbImage.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
+        binding.mbVideo.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
+        binding.mbAudio.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
+        binding.mbDocument.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
         binding.mbService.setOnClickListener { askPermission() }
+    }
+
+    private fun setPath() {
+        ConfigUtils.backupDir = File(filesDir, "backup_files")
+        ConfigUtils.recoveryDir = File(filesDir, "recovery_files")
     }
 
     private fun setUI() {
@@ -39,16 +47,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         }
     }
 
-    private fun navigateScreen(caseType: Int) {
-        val intent = Intent(this, ActivityMedia::class.java)
-        intent.putExtra("caseType", caseType)
-        startActivity(intent)
-    }
-
     private fun askPermission() {
-        askMediaPermission {
+        askFullStoragePermission {
             when (it) {
-                true -> askNotificationPermission()
+                true -> askMediaPermission {
+                    when (it) {
+                        true -> askNotificationPermission()
+                        false -> Toast.makeText(this, "Permission Required", Toast.LENGTH_SHORT).show()
+                    }
+                }
                 false -> Toast.makeText(this, "Permission Required", Toast.LENGTH_SHORT).show()
             }
         }

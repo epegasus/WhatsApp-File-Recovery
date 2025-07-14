@@ -17,13 +17,18 @@ class MediaService : Service() {
     override fun onBind(intent: Intent): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        postNotification()
+        initMediaObserver()
+        return START_STICKY
+    }
 
+    private fun postNotification() {
         val notification = NotificationManager(this).createNotificationService()
         startForeground(100, notification)
+    }
 
+    private fun initMediaObserver() {
         mediaObserverManager.startObserving()
-
-        return START_STICKY
     }
 
     override fun onDestroy() {

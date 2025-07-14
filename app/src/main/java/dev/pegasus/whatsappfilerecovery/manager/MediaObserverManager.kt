@@ -6,8 +6,9 @@ import android.os.Environment
 import android.os.FileObserver
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleCoroutineScope
+import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils.backupDir
+import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils.recoveryDir
 import dev.pegasus.whatsappfilerecovery.utils.ConstantUtils.TAG
 import dev.pegasus.whatsappfilerecovery.utils.copySafely
 import kotlinx.coroutines.launch
@@ -24,12 +25,8 @@ import java.io.File
 
 class MediaObserverManager(private val context: Context, private val notificationManager: NotificationManager, private val applicationScope: LifecycleCoroutineScope) {
 
-    private val treeUri by lazy { (context.getSharedPreferences("permission_preferences", Context.MODE_PRIVATE)).getString("document_tree_uri", "")?.toUri() }
-
+    private val fileManager by lazy { FileManager(context, notificationManager) }
     private val observers = mutableListOf<FileObserver>()
-
-    private val backupDir = File(context.filesDir, "file_backup")
-    private val recoveryDir = File(context.filesDir, "file_recovery")
 
     fun startObserving() {
         Log.d(TAG, "MediaObserver: startObserving: Service Started")
@@ -48,53 +45,54 @@ class MediaObserverManager(private val context: Context, private val notificatio
     }
 
     private fun getFoldersToObserve(): List<String> {
-        val root = Environment.getExternalStorageDirectory()
+        val root = Environment.getExternalStorageDirectory().absolutePath
+        val mediaRoot = Environment.getExternalStorageDirectory().absolutePath + "/Android/media/"
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             listOf(
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Animated Gifs/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Documents/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Animated Gifs/",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
             )
         else
             listOf(
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Documents/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Stickers/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
-                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Animated Gifs/",
-                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Documents/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/",
+                "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Animated Gifs/",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
+                "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
                 "$root/WhatsApp/Media/WhatsApp Images",
-                "$root/WhatsApp Business/Media/WhatsApp Business Images",
                 "$root/WhatsApp/Media/WhatsApp Video",
-                "$root/WhatsApp Business/Media/WhatsApp Business Video",
                 "$root/WhatsApp/Media/WhatsApp Audio",
-                "$root/WhatsApp Business/Media/WhatsApp Business Audio",
                 "$root/WhatsApp/Media/WhatsApp Voice Notes",
-                "$root/WhatsApp Business/Media/WhatsApp Business Voice Notes",
                 "$root/WhatsApp/Media/WhatsApp Documents",
-                "$root/WhatsApp Business/Media/WhatsApp Business Documents",
                 "$root/WhatsApp/Media/WhatsApp Stickers",
-                "$root/WhatsApp Business/Media/WhatsApp Business Stickers",
                 "$root/WhatsApp/Media/WhatsApp Animated Gifs",
+                "$root/WhatsApp Business/Media/WhatsApp Business Images",
+                "$root/WhatsApp Business/Media/WhatsApp Business Video",
+                "$root/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$root/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$root/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$root/WhatsApp Business/Media/WhatsApp Business Stickers",
                 "$root/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
             )
     }
@@ -107,12 +105,12 @@ class MediaObserverManager(private val context: Context, private val notificatio
      */
     private fun createObserver(folderPath: String): FileObserver? {
         val folder = File(folderPath)
-
         if (!folder.exists() || !folder.isDirectory) return null
 
-        val isVoiceNote = folderPath.contains("Voice Notes")
-        val isScopedStorage = folderPath.contains("/Android/media/")
+        val isVoiceNote = folderPath.contains("Voice Notes", ignoreCase = true)
+        val isScopedStorage = folderPath.contains("/Android/media/", ignoreCase = true)
 
+        Log.v(TAG, "MediaObserverManager: createObserver: Observing: $folderPath")
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                 if (isVoiceNote) MediaObserverHigherVoiceNote(folder)
@@ -131,7 +129,6 @@ class MediaObserverManager(private val context: Context, private val notificatio
 
     @Suppress("DEPRECATION")
     inner class MediaObserver(private val folderPath: String) : FileObserver(folderPath, CREATE or MODIFY or MOVED_TO or DELETE) {
-
         override fun onEvent(event: Int, path: String?) {
             if (path.isNullOrEmpty()) return
             val eventFile = File("$folderPath/$path")
@@ -155,42 +152,18 @@ class MediaObserverManager(private val context: Context, private val notificatio
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    inner class MediaObserverHigher(private val folder: File) : FileObserver(folder, CREATE or MODIFY or DELETE or MOVED_TO or ATTRIB or ACCESS) {
-
-        override fun onEvent(event: Int, path: String?) {
-            if (path.isNullOrEmpty()) return
-            val eventFile = File(folder, path)
-
-            when (event) {
-                CREATE, MODIFY -> {
-                    applicationScope.launch { eventFile.copySafely(context, backupDir, treeUri!!) }
-                }
-
-                DELETE -> {
-                    applicationScope.launch {
-                        val cached = File(backupDir, eventFile.name)
-                        if (cached.exists()) {
-                            cached.copySafely(context, recoveryDir, treeUri!!)
-                            notificationManager.postNotificationRecovery(cached)
-                        } else {
-                            Log.e(TAG, "MediaObserverHigher: onEvent: file: $cached not exist.")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    inner class MediaObserverHigherVoiceNote(private val folder: File) : FileObserver(folder, CREATE or MODIFY or DELETE or MOVED_TO or ATTRIB or ACCESS) {
+    inner class MediaObserverHigherVoiceNote(private val folder: File) : FileObserver(folder, ALL_EVENTS) {
 
         private var latestObserver: FileObserver? = null
         private var latestObservedFolder: File? = null
+        private var currentPath = ""
 
         override fun onEvent(event: Int, path: String?) {
             if (path.isNullOrEmpty()) return
-            val eventFile = File(folder, path)
+            if (currentPath.isNotEmpty() && currentPath == path) return
+            currentPath = path
 
+            val eventFile = File(folder, path)
             when (event) {
                 CREATE, MODIFY, 1073741840, 1073741856 -> {
                     if (eventFile.isDirectory) {
@@ -214,6 +187,18 @@ class MediaObserverManager(private val context: Context, private val notificatio
                     MediaObserver(latestFolder.path)
                 }
                 latestObserver?.startWatching()
+                Log.d(TAG, "MediaObserverHigherVoiceNote: observeLatestModifiedFolder: Observing this one: $latestFolder")
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    inner class MediaObserverHigher(private val folder: File) : FileObserver(folder.absolutePath, CREATE or MOVED_TO or DELETE) {
+        override fun onEvent(event: Int, path: String?) {
+            if (path.isNullOrEmpty()) return
+            when (event) {
+                CREATE, MOVED_TO -> applicationScope.launch { fileManager.copyFile(folder, path) }
+                DELETE -> applicationScope.launch { fileManager.recoverFile(folder, path) }
             }
         }
     }
