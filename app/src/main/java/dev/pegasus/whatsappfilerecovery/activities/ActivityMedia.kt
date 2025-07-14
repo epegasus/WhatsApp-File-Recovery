@@ -15,7 +15,7 @@ class ActivityMedia : BaseActivity<ActivityMediaBinding>(ActivityMediaBinding::i
     private val adapter by lazy { AdapterMedia() }
 
     private val caseType by lazy { intent.getIntExtra("caseType", 0) }
-    private val recoveryDir by lazy { File(filesDir, "File Recovery") }
+    private val recoveryDir by lazy { File(filesDir, "file_recovery") }
 
     override fun onCreated() {
         initRecyclerView()

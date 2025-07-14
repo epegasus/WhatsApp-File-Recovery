@@ -34,15 +34,24 @@ suspend fun File.copySafely(context: Context, dstDir: File, treeUri: Uri) = with
         val newFile = File(dstDir, src.name)
         when {
             src.canReadDirectly() -> src.copyTo(newFile, overwrite = true)
-            else -> copyViaDocumentFile(context, src, dstDir, treeUri)   // Scoped‑storage fallback
+            else -> copyViaDocumentFile(context, src, dstDir, treeUri)
         }
         Log.d(TAG, "FileUtils: copySafely: Copied ${src.name} → $newFile")
     }.onFailure { Log.e(TAG, "FileUtils: copySafely: Copy failed: ${src.path}", it) }
 }
 
 fun File.canReadDirectly(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-            || !path.startsWith("${Environment.getExternalStorageDirectory()}/Android/media/")
+    val mediaRoot = Environment.getExternalStorageDirectory().absolutePath + "/Android/media/"
+
+    // Define the known "can't read directly" folders
+    val voiceNoteDirs = listOf(
+        "$mediaRoot/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+        "$mediaRoot/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes"
+    )
+
+    val isVoiceNoteDir = voiceNoteDirs.any { path.startsWith(it) }
+
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || (!path.startsWith(mediaRoot) || !isVoiceNoteDir)
 }
 
 private fun copyViaDocumentFile(

@@ -26,11 +26,10 @@ class MediaObserverManager(private val context: Context, private val notificatio
 
     private val treeUri by lazy { (context.getSharedPreferences("permission_preferences", Context.MODE_PRIVATE)).getString("document_tree_uri", "")?.toUri() }
 
-
     private val observers = mutableListOf<FileObserver>()
 
-    private val backupDir = File(context.filesDir, "File Backup")
-    private val recoveryDir = File(context.filesDir, "File Recovery")
+    private val backupDir = File(context.filesDir, "file_backup")
+    private val recoveryDir = File(context.filesDir, "file_recovery")
 
     fun startObserving() {
         Log.d(TAG, "MediaObserver: startObserving: Service Started")
@@ -49,53 +48,54 @@ class MediaObserverManager(private val context: Context, private val notificatio
     }
 
     private fun getFoldersToObserve(): List<String> {
+        val root = Environment.getExternalStorageDirectory()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             listOf(
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Animated Gifs/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Animated Gifs/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
             )
         else
             listOf(
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Documents/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Stickers/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Animated Gifs/",
-                "${Environment.getExternalStorageDirectory()}/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Images",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Images",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Video",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Video",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Audio",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Audio",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Voice Notes",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Voice Notes",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Documents",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Documents",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Stickers",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Stickers",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp/Media/WhatsApp Animated Gifs",
-                "${Environment.getExternalStorageDirectory()}/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Images/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Images/",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Video/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Video",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Audio/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Voice Notes/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Documents/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Stickers/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Stickers",
+                "$root/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Animated Gifs/",
+                "$root/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
+                "$root/WhatsApp/Media/WhatsApp Images",
+                "$root/WhatsApp Business/Media/WhatsApp Business Images",
+                "$root/WhatsApp/Media/WhatsApp Video",
+                "$root/WhatsApp Business/Media/WhatsApp Business Video",
+                "$root/WhatsApp/Media/WhatsApp Audio",
+                "$root/WhatsApp Business/Media/WhatsApp Business Audio",
+                "$root/WhatsApp/Media/WhatsApp Voice Notes",
+                "$root/WhatsApp Business/Media/WhatsApp Business Voice Notes",
+                "$root/WhatsApp/Media/WhatsApp Documents",
+                "$root/WhatsApp Business/Media/WhatsApp Business Documents",
+                "$root/WhatsApp/Media/WhatsApp Stickers",
+                "$root/WhatsApp Business/Media/WhatsApp Business Stickers",
+                "$root/WhatsApp/Media/WhatsApp Animated Gifs",
+                "$root/WhatsApp Business/Media/WhatsApp Business Animated Gifs",
             )
     }
 
