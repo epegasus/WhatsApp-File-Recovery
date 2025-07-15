@@ -61,6 +61,7 @@ class FileManager(private val context: Context, private val notificationManager:
         }
 
         simpleCopy(src, dst) {
+            src.delete()
             notificationManager.postNotificationRecovery(src)
         }
     }
@@ -72,7 +73,7 @@ class FileManager(private val context: Context, private val notificationManager:
             Log.d(TAG, "FileManager: simpleCopy: Copied Successfully from: $src, to: $dst")
             postNotification?.invoke()
         }.onFailure {
-            Log.e(TAG, "FileManager: simpleCopy: Failed to Copied from: $src, to: $dst")
+            Log.e(TAG, "FileManager: simpleCopy: Failed to Copied from: $src, to: $dst", it)
         }
     }
 
@@ -111,7 +112,7 @@ class FileManager(private val context: Context, private val notificationManager:
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             FileUtils.copy(inputStream, outputStream)
                             Log.d(TAG, "copyViaDocumentFile: copied")
-                            return@let
+                            return@runCatching
                         }
                     }
             }

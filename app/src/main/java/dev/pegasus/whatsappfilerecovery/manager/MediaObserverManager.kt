@@ -7,10 +7,7 @@ import android.os.FileObserver
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleCoroutineScope
-import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils.backupDir
-import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils.recoveryDir
 import dev.pegasus.whatsappfilerecovery.utils.ConstantUtils.TAG
-import dev.pegasus.whatsappfilerecovery.utils.copySafely
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -127,30 +124,6 @@ class MediaObserverManager(private val context: Context, private val notificatio
         }
     }
 
-    @Suppress("DEPRECATION")
-    inner class MediaObserver(private val folderPath: String) : FileObserver(folderPath, CREATE or MODIFY or MOVED_TO or DELETE) {
-        override fun onEvent(event: Int, path: String?) {
-            if (path.isNullOrEmpty()) return
-            val eventFile = File("$folderPath/$path")
-
-            when (event) {
-                CREATE, MODIFY, MOVED_TO -> {
-                    applicationScope.launch { eventFile.copySafely(context, backupDir, treeUri!!) }
-                }
-
-                DELETE -> {
-                    applicationScope.launch {
-                        val cached = File(backupDir, eventFile.name)
-                        if (cached.exists()) {
-                            cached.copySafely(context, recoveryDir, treeUri!!)
-                            notificationManager.postNotificationRecovery(cached)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.Q)
     inner class MediaObserverHigherVoiceNote(private val folder: File) : FileObserver(folder, ALL_EVENTS) {
 
@@ -193,9 +166,21 @@ class MediaObserverManager(private val context: Context, private val notificatio
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    inner class MediaObserverHigher(private val folder: File) : FileObserver(folder.absolutePath, CREATE or MOVED_TO or DELETE) {
+    inner class MediaObserverHigher(private val folder: File) : FileObserver(folder, CREATE or MOVED_TO or DELETE) {
         override fun onEvent(event: Int, path: String?) {
             if (path.isNullOrEmpty()) return
+            when (event) {
+                CREATE, MOVED_TO -> applicationScope.launch { fileManager.copyFile(folder, path) }
+                DELETE -> applicationScope.launch { fileManager.recoverFile(folder, path) }
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    inner class MediaObserver(private val folderPath: String) : FileObserver(folderPath, CREATE or MOVED_TO or DELETE) {
+        override fun onEvent(event: Int, path: String?) {
+            if (path.isNullOrEmpty()) return
+            val folder = File(folderPath)
             when (event) {
                 CREATE, MOVED_TO -> applicationScope.launch { fileManager.copyFile(folder, path) }
                 DELETE -> applicationScope.launch { fileManager.recoverFile(folder, path) }
