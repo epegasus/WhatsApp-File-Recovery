@@ -27,6 +27,9 @@
         android:theme="@style/Theme.WhatsAppFileRecovery"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.activities.ActivityVideos"
+            android:exported="false" />
+        <activity
             android:name=".presentation.activities.ActivityImages"
             android:exported="false" />
         <activity
