@@ -1,4 +1,4 @@
-package dev.pegasus.whatsappfilerecovery.manager
+package dev.pegasus.whatsappfilerecovery.data.mediaManager
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -39,7 +39,7 @@ class NotificationManager(private val context: Context) {
                 description = "Working on background for the detection of deleted media (to recover)."
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PRIVATE
             }
-            val channelRecovery = NotificationChannel(channelIdService, "Media Recovery", NotificationManager.IMPORTANCE_LOW).apply {
+            val channelRecovery = NotificationChannel(channelIdRecovery, "Media Recovery", NotificationManager.IMPORTANCE_LOW).apply {
                 description = "Notifications will be post on any delete media recovery."
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PRIVATE
             }

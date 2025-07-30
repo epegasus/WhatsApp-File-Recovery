@@ -1,4 +1,4 @@
-package dev.pegasus.whatsappfilerecovery.base
+package dev.pegasus.whatsappfilerecovery.utils.base
 
 import android.Manifest
 import android.content.Context
@@ -33,7 +33,7 @@ import dev.pegasus.whatsappfilerecovery.utils.hasU
 
 open class BaseActivityPermission : AppCompatActivity() {
 
-    private val sharedPreferences by lazy { getSharedPreferences("permission_preferences", Context.MODE_PRIVATE) }
+    private val sharedPreferences by lazy { getSharedPreferences("permission_preferences", MODE_PRIVATE) }
     private val editor by lazy { sharedPreferences?.edit() }
     private var callback: ((Boolean) -> Unit)? = null
 

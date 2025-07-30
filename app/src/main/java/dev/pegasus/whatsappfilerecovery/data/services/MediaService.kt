@@ -1,12 +1,12 @@
-package dev.pegasus.whatsappfilerecovery.services
+package dev.pegasus.whatsappfilerecovery.data.services
 
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import dev.pegasus.whatsappfilerecovery.manager.MediaObserverManager
-import dev.pegasus.whatsappfilerecovery.manager.NotificationManager
+import dev.pegasus.whatsappfilerecovery.data.mediaManager.MediaObserverManager
+import dev.pegasus.whatsappfilerecovery.data.mediaManager.NotificationManager
 
 class MediaService : Service() {
 

@@ -7,12 +7,11 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import dev.pegasus.whatsappfilerecovery.activities.ActivityImages
-import dev.pegasus.whatsappfilerecovery.base.BaseActivity
+import dev.pegasus.whatsappfilerecovery.presentation.activities.ActivityImages
+import dev.pegasus.whatsappfilerecovery.utils.base.BaseActivity
 import dev.pegasus.whatsappfilerecovery.databinding.ActivityMainBinding
-import dev.pegasus.whatsappfilerecovery.services.MediaService
+import dev.pegasus.whatsappfilerecovery.data.services.MediaService
 import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils
-import java.io.File
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
@@ -36,8 +35,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     private fun setPath() {
-        ConfigUtils.backupDir = File(filesDir, "backup_files")
-        ConfigUtils.recoveryDir = File(filesDir, "recovery_files")
+        ConfigUtils.initPaths(filesDir)
     }
 
     private fun setUI() {
@@ -56,6 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                         false -> Toast.makeText(this, "Permission Required", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 false -> Toast.makeText(this, "Permission Required", Toast.LENGTH_SHORT).show()
             }
         }

@@ -1,4 +1,4 @@
-package dev.pegasus.whatsappfilerecovery.adapters
+package dev.pegasus.whatsappfilerecovery.presentation.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -1,4 +1,4 @@
-package dev.pegasus.whatsappfilerecovery.manager
+package dev.pegasus.whatsappfilerecovery.data.mediaManager
 
 import android.content.Context
 import android.os.Build
