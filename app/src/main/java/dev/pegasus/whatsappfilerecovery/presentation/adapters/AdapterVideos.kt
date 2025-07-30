@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import dev.pegasus.whatsappfilerecovery.databinding.ItemImageBinding
+import dev.pegasus.whatsappfilerecovery.databinding.ItemVideoBinding
 
 /**
  * Created by: Sohaib Ahmed
@@ -17,11 +17,11 @@ import dev.pegasus.whatsappfilerecovery.databinding.ItemImageBinding
  * - GitHub: <a href="https://github.com/epegasus">Github</a>
  */
 
-class AdapterImages : ListAdapter<String, AdapterImages.CustomViewHolder>(DiffCallback) {
+class AdapterVideos : ListAdapter<String, AdapterVideos.CustomViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = ItemImageBinding.inflate(layoutInflater, parent, false)
+        val binding = ItemVideoBinding.inflate(layoutInflater, parent, false)
         return CustomViewHolder(binding)
     }
 
@@ -31,11 +31,11 @@ class AdapterImages : ListAdapter<String, AdapterImages.CustomViewHolder>(DiffCa
         bindViews(holder.binding, currentItem)
     }
 
-    private fun bindViews(binding: ItemImageBinding, currentItem: String) {
+    private fun bindViews(binding: ItemVideoBinding, currentItem: String) {
         Glide.with(binding.root).load(currentItem).into(binding.ifvThumbnail)
     }
 
-    class CustomViewHolder(val binding: ItemImageBinding) : RecyclerView.ViewHolder(binding.root)
+    class CustomViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root)
 
     object DiffCallback : DiffUtil.ItemCallback<String>() {
         override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {

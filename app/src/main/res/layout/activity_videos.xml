@@ -5,30 +5,31 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.activities.ActivityImages">
+    tools:context=".presentation.activities.ActivityVideos">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarMedia"
+        android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_back"
-        app:title="Media" />
+        app:title="Videos" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvList"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarMedia"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:spanCount="3"
-        tools:listitem="@layout/item_media" />
+        tools:listitem="@layout/item_image" />
 
     <ProgressBar
         android:id="@+id/progressBar"

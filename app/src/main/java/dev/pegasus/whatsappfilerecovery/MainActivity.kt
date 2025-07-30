@@ -7,11 +7,12 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import dev.pegasus.whatsappfilerecovery.presentation.activities.ActivityImages
-import dev.pegasus.whatsappfilerecovery.utils.base.BaseActivity
-import dev.pegasus.whatsappfilerecovery.databinding.ActivityMainBinding
 import dev.pegasus.whatsappfilerecovery.data.services.MediaService
+import dev.pegasus.whatsappfilerecovery.databinding.ActivityMainBinding
+import dev.pegasus.whatsappfilerecovery.presentation.activities.ActivityImages
+import dev.pegasus.whatsappfilerecovery.presentation.activities.ActivityVideos
 import dev.pegasus.whatsappfilerecovery.utils.ConfigUtils
+import dev.pegasus.whatsappfilerecovery.utils.base.BaseActivity
 
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
@@ -28,9 +29,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         setUI()
 
         binding.mbImage.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
-        binding.mbVideo.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
-        binding.mbAudio.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
-        binding.mbDocument.setOnClickListener { startActivity(Intent(this, ActivityImages::class.java)) }
+        binding.mbVideo.setOnClickListener { startActivity(Intent(this, ActivityVideos::class.java)) }
+        binding.mbAudio.setOnClickListener { Toast.makeText(this, "Under Development", Toast.LENGTH_SHORT).show() }
+        binding.mbDocument.setOnClickListener { Toast.makeText(this, "Under Development", Toast.LENGTH_SHORT).show() }
         binding.mbService.setOnClickListener { askPermission() }
     }
 
@@ -48,8 +49,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun askPermission() {
         askFullStoragePermission {
             when (it) {
-                true -> askMediaPermission {
-                    when (it) {
+                true -> askMediaPermission { mediaPermission ->
+                    when (mediaPermission) {
                         true -> askNotificationPermission()
                         false -> Toast.makeText(this, "Permission Required", Toast.LENGTH_SHORT).show()
                     }
@@ -61,9 +62,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     private fun askNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-            && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             return
         }

@@ -7,11 +7,17 @@
     android:layout_marginBottom="8dp">
 
     <androidx.constraintlayout.utils.widget.ImageFilterView
-        android:id="@+id/ifvImage"
+        android:id="@+id/ifvThumbnail"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#DCDCDC"
         android:scaleType="centerCrop"
         app:round="8dp" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_play" />
 
 </FrameLayout>
